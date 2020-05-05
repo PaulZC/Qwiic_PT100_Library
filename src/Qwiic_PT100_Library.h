@@ -81,6 +81,12 @@
 // The maximum time we will wait for DRDY to go valid for a single conversion
 #define ADS122C04_CONVERSION_TIMEOUT 75
 
+// Define 2/3/4-Wire and Temperature modes
+#define ADS122C04_4WIRE_MODE         0x0
+#define ADS122C04_3WIRE_MODE         0x1
+#define ADS122C04_2WIRE_MODE         0x2
+#define ADS122C04_TEMPERATURE_MODE   0x3
+
 // ADS122C04 Table 16 in Datasheet
 #define ADS122C04_RESET_CMD          0x06     //0000 011x      Reset
 #define ADS122C04_START_CMD          0x08     //0000 100x      Start/Sync
@@ -461,20 +467,22 @@ public:
   boolean start(void); // Start a conversion
   boolean powerdown(void); // Put the chip into low power mode
 
-  void setInputMultiplexer(uint8_t mux_config = ADS122C04_MUX_AIN0_AIN1); // Configure the input multiplexer
-  void setGain(uint8_t gain_config = ADS122C04_GAIN_1); // Configure the gain
-  void enablePGA(uint8_t enable = ADS122C04_PGA_ENABLED); // Enable/disable the Programmable Gain Amplifier
-  void setDataRate(uint8_t rate = ADS122C04_DATA_RATE_20SPS); // Set the data rate (sample speed)
-  void setOperatingMode(uint8_t mode = ADS122C04_OP_MODE_NORMAL); // Configure the operating mode (normal / turbo)
-  void setConversionMode(uint8_t mode = ADS122C04_CONVERSION_MODE_SINGLE_SHOT); // Configure the conversion mode (single-shot / continuous)
-  void setVoltageReference(uint8_t ref = ADS122C04_VREF_INTERNAL); // Configure the voltage reference
-  void enableInternalTempSensor(uint8_t enable = ADS122C04_TEMP_SENSOR_OFF); // Enable / disable the internal temperature sensor
-  void setDataCounter(uint8_t enable = ADS122C04_DCNT_DISABLE); // Enable / disable the conversion data counter
-  void setDataIntegrityCheck(uint8_t setting = ADS122C04_CRC_DISABLED); // Configure the data integrity check
-  void setBurnOutCurrent(uint8_t enable = ADS122C04_BURN_OUT_CURRENT_OFF); // Enable / disable the 10uA burn-out current source
-  void setIDACcurrent(uint8_t current = ADS122C04_IDAC_CURRENT_OFF); // Configure the internal programmable current sources
-  void setIDAC1mux(uint8_t setting = ADS122C04_IDAC1_DISABLED); // Configure the IDAC1 routing
-  void setIDAC2mux(uint8_t setting = ADS122C04_IDAC1_DISABLED); // Configure the IDAC2 routing
+  boolean configure234wire(uint8_t wire_mode = ADS122C04_4WIRE_MODE); // Configure the chip for the chosen mode
+
+  boolean setInputMultiplexer(uint8_t mux_config = ADS122C04_MUX_AIN1_AIN0); // Configure the input multiplexer
+  boolean setGain(uint8_t gain_config = ADS122C04_GAIN_8); // Configure the gain
+  boolean enablePGA(uint8_t enable = ADS122C04_PGA_ENABLED); // Enable/disable the Programmable Gain Amplifier
+  boolean setDataRate(uint8_t rate = ADS122C04_DATA_RATE_20SPS); // Set the data rate (sample speed)
+  boolean setOperatingMode(uint8_t mode = ADS122C04_OP_MODE_NORMAL); // Configure the operating mode (normal / turbo)
+  boolean setConversionMode(uint8_t mode = ADS122C04_CONVERSION_MODE_SINGLE_SHOT); // Configure the conversion mode (single-shot / continuous)
+  boolean setVoltageReference(uint8_t ref = ADS122C04_VREF_EXT_REF_PINS); // Configure the voltage reference
+  boolean enableInternalTempSensor(uint8_t enable = ADS122C04_TEMP_SENSOR_OFF); // Enable / disable the internal temperature sensor
+  boolean setDataCounter(uint8_t enable = ADS122C04_DCNT_DISABLE); // Enable / disable the conversion data counter
+  boolean setDataIntegrityCheck(uint8_t setting = ADS122C04_CRC_DISABLED); // Configure the data integrity check
+  boolean setBurnOutCurrent(uint8_t enable = ADS122C04_BURN_OUT_CURRENT_OFF); // Enable / disable the 10uA burn-out current source
+  boolean setIDACcurrent(uint8_t current = ADS122C04_IDAC_CURRENT_1000_UA); // Configure the internal programmable current sources
+  boolean setIDAC1mux(uint8_t setting = ADS122C04_IDAC1_AIN3); // Configure the IDAC1 routing
+  boolean setIDAC2mux(uint8_t setting = ADS122C04_IDAC2_DISABLED); // Configure the IDAC2 routing
 
   boolean checkDataReady(void); // Check the status of the DRDY bit in Config Register 2
 
@@ -500,6 +508,20 @@ private:
 
 	Stream *_debugPort;			 //The stream to send debug messages to if enabled. Usually Serial.
 	boolean _printDebug = false; //Flag to print debugging variables
+
+  // Keep a copy of the wire mode so we can restore it after reading the internal temperature
+  uint8_t _wireMode = ADS122C04_4WIRE_MODE;
+
+  // Resistance of the reference resistor
+  const float PT100_REFERENCE_RESISTOR = 1620.0;
+
+  // Amplifier gain setting
+  // ** MAKE SURE THE CONFIG REGISTER 0 GAIN IS THE SAME AS THIS **
+  const float PT100_AMPLIFIER_GAIN = 8.0;
+
+  // Internal temperature sensor resolution
+  // One 14-bit LSB equals 0.03125°C
+  const float TEMPERATURE_SENSOR_RESOLUTION = 0.03125;
 
   void debugPrint(char *message); // print a debug message
   void debugPrintln(char *message); // print a debug message with line feed
