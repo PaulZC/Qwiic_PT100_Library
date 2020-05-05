@@ -73,6 +73,7 @@
 #endif
 
 // Define Serial for SparkFun SAMD based boards.
+// You may need to comment these three lines if your SAMD board supports Serial (not SerialUSB)
 #if defined(ARDUINO_ARCH_SAMD)
 #define Serial SerialUSB
 #endif
@@ -439,6 +440,24 @@ union raw_voltage_union{
   uint32_t UINT32;
 };
 
+// struct to hold the initialisation parameters
+typedef struct{
+  uint8_t inputMux;
+  uint8_t gainLevel;
+  uint8_t pgaBypass;
+  uint8_t dataRate;
+  uint8_t opMode;
+  uint8_t convMode;
+  uint8_t selectVref;
+  uint8_t tempSensorEn;
+  uint8_t dataCounterEn;
+  uint8_t dataCRCen;
+  uint8_t burnOutEn;
+  uint8_t idacCurrent;
+  uint8_t routeIDAC1;
+  uint8_t routeIDAC2;
+} ADS122C04_initParam;
+
 class SFE_QWIIC_PT100
 {
 public:
@@ -453,8 +472,8 @@ public:
   void enableDebugging(Stream &debugPort = Serial); // enable debug messages
   void disableDebugging(); // disable debug messages
 
-  float readPT100centigrade(void); // Read the PT100 temperature in Centigrade
-  float readPT100fahrenheit(void); // Read the PT100 temperature in Fahrenheit
+  float readPT100Centigrade(void); // Read the PT100 temperature in Centigrade
+  float readPT100Fahrenheit(void); // Read the PT100 temperature in Fahrenheit
 
   // Read the raw signed 24-bit ADC value as int32_t
   // The result needs to be multiplied by VREF / GAIN to convert to Volts
@@ -523,25 +542,10 @@ private:
   // One 14-bit LSB equals 0.03125°C
   const float TEMPERATURE_SENSOR_RESOLUTION = 0.03125;
 
+  ADS122C04Reg_t ADS122C04_Reg; // Global to hold copies of all four configuration registers
+
   void debugPrint(char *message); // print a debug message
   void debugPrintln(char *message); // print a debug message with line feed
-
-  typedef struct{
-    uint8_t inputMux;
-    uint8_t gainLevel;
-    uint8_t pgaBypass;
-    uint8_t dataRate;
-    uint8_t opMode;
-    uint8_t convMode;
-    uint8_t selectVref;
-    uint8_t tempSensorEn;
-    uint8_t dataCounterEn;
-    uint8_t dataCRCen;
-    uint8_t burnOutEn;
-    uint8_t idacCurrent;
-    uint8_t routeIDAC1;
-    uint8_t routeIDAC2;
-  }ADS122C04_initParam; // struct to hold the initialisation parameters
 
   boolean ADS122C04_init(ADS122C04_initParam *param); // initialise the ADS122C04 with these parameters
 

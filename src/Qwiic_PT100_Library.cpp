@@ -36,7 +36,10 @@
 
 #include "Qwiic_PT100_Library.h"
 
-ADS122C04Reg_t ADS122C04_Reg; // Global to hold copies of all four registers
+SFE_QWIIC_PT100::SFE_QWIIC_PT100(void)
+{
+	// Constructor
+}
 
 //Attempt communication with the device and initialise it
 //Return true if successful
@@ -51,7 +54,10 @@ boolean SFE_QWIIC_PT100::begin(uint8_t deviceAddress, TwoWire &wirePort)
 
 	if (isConnected() == false)
 	{
-		debugPrintln("begin: isConnected returned false");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("begin: isConnected returned false"));
+	  }
 		return (false);
 	}
 
@@ -61,7 +67,7 @@ boolean SFE_QWIIC_PT100::begin(uint8_t deviceAddress, TwoWire &wirePort)
 }
 
 // Configure the chip for the selected wire mode
-boolean configure234wire(uint8_t wire_mode)
+boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
 {
 	ADS122C04_initParam initParams; // Storage for the chip parameters
 
@@ -139,7 +145,10 @@ boolean configure234wire(uint8_t wire_mode)
 	}
 	else
 	{
-		debugPrintln("configure234wire: unknown mode");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("configure234wire: unknown mode"));
+	  }
 		return(false);
 	}
 	return(ADS122C04_init(&initParams)); // Configure the chip
@@ -155,7 +164,7 @@ boolean SFE_QWIIC_PT100::isConnected(void)
 //Enable or disable the printing of debug messages
 void SFE_QWIIC_PT100::enableDebugging(Stream &debugPort)
 {
-  _debugSerial = &debugPort; //Grab which port the user wants us to use for debugging
+  _debugPort = &debugPort; //Grab which port the user wants us to use for debugging
   _printDebug = true; //Should we print the commands we send? Good for debugging
 }
 
@@ -169,7 +178,7 @@ void SFE_QWIIC_PT100::debugPrint(char *message)
 {
   if (_printDebug == true)
   {
-    _debugSerial->print(message);
+    _debugPort->print(message);
   }
 }
 
@@ -178,7 +187,7 @@ void SFE_QWIIC_PT100::debugPrintln(char *message)
 {
   if (_printDebug == true)
   {
-    _debugSerial->println(message);
+    _debugPort->println(message);
   }
 }
 
@@ -203,14 +212,20 @@ float SFE_QWIIC_PT100::readPT100Centigrade(void) // Read the temperature in Cent
 	// Check if we timed out
 	if (drdy == false)
 	{
-		debugPrintln("readPT100Centigrade: checkDataReady timed out");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readPT100Centigrade: checkDataReady timed out"));
+	  }
 		return(ret_val);
 	}
 
 	// Read the conversion result
 	if(ADS122C04_getConversionData(&raw_v.UINT32) == false)
 	{
-		debugPrintln("readPT100Centigrade: ADS122C04_getConversionData failed");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readPT100Centigrade: ADS122C04_getConversionData failed"));
+	  }
 		return(ret_val);
 	}
 
@@ -218,7 +233,9 @@ float SFE_QWIIC_PT100::readPT100Centigrade(void) // Read the temperature in Cent
 	// If we just do a <<8 we will multiply the result by 256
 	// Instead pad out the MSB with the MS bit of the 24 bits
 	if ((raw_v.UINT32 & 0x00800000) == 0x00800000)
+	{
 		raw_v.UINT32 |= 0xFF000000;
+	}
 
 	// raw_v.UINT32 now contains the ADC result, correctly signed
 	// Now we need to convert it to temperature using the PT100 resistance,
@@ -229,7 +246,7 @@ float SFE_QWIIC_PT100::readPT100Centigrade(void) // Read the temperature in Cent
 	// https://www.analog.com/media/en/technical-documentation/application-notes/AN709_0.pdf
 
 	// 2^23 is 8388608
-	RTD = ((float)raw_v.UINT32) / 8388608.0); // Load RTD with the scaled ADC value
+	RTD = ((float)raw_v.UINT32) / 8388608.0; // Load RTD with the scaled ADC value
 	RTD *= PT100_REFERENCE_RESISTOR; // Multiply by the reference resistor
 	RTD /= PT100_AMPLIFIER_GAIN; // Divide by the amplifier gain
 	if (_wireMode == ADS122C04_3WIRE_MODE) // If we are using 3-wire mode
@@ -247,11 +264,11 @@ float SFE_QWIIC_PT100::readPT100Centigrade(void) // Read the temperature in Cent
 	ret_val -= 3.9083e-3;
 	ret_val /= -1.155e-6;
 
-	//  Check if it is positive, return if it is
+	//  Check if the temperature is positive, return if it is
 	if (ret_val >= 0.0)
 		return(ret_val);
 
-	// The temperature is negative so we need to use another formula
+	// The temperature is negative so we need to use a different formula
 	ret_val = -242.02;
 	ret_val += 2.2228 * RTD;
 	POLY = RTD * RTD; // Load the polynomial with RTD^2
@@ -292,14 +309,20 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
 	// Check if we timed out
 	if (drdy == false)
 	{
-		debugPrintln("readRawVoltage: checkDataReady timed out");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readRawVoltage: checkDataReady timed out"));
+	  }
 		return(0);
 	}
 
 	// Read the conversion result
 	if(ADS122C04_getConversionData(&raw_v.UINT32) == false)
 	{
-		debugPrintln("readRawVoltage: ADS122C04_getConversionData failed");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readRawVoltage: ADS122C04_getConversionData failed"));
+	  }
 		return(0);
 	}
 
@@ -312,7 +335,7 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
 }
 
 // Read the internal temperature
-float readInternalTemperature(void)
+float SFE_QWIIC_PT100::readInternalTemperature(void)
 {
 	internal_temperature_union int_temp; // union to convert uint16_t to int16_t
 	uint32_t raw_temp; // The raw temperature from the ADC
@@ -325,7 +348,10 @@ float readInternalTemperature(void)
 	// Reading the ADC value will return the temperature
 	if ((configure234wire(ADS122C04_TEMPERATURE_MODE)) == false)
 	{
-		debugPrintln("readInternalTemperature: configure234wire (1) failed");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readInternalTemperature: configure234wire (1) failed"));
+	  }
 		return(ret_val);
 	}
 
@@ -342,7 +368,10 @@ float readInternalTemperature(void)
 	// Check if we timed out
 	if (drdy == false)
 	{
-		debugPrintln("readInternalTemperature: checkDataReady timed out");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readInternalTemperature: checkDataReady timed out"));
+	  }
 		configure234wire(previousWireMode); // Attempt to restore the previous wire mode
 		return(ret_val);
 	}
@@ -350,7 +379,10 @@ float readInternalTemperature(void)
 	// Read the conversion result
 	if(ADS122C04_getConversionData(&raw_temp) == false)
 	{
-		debugPrintln("readInternalTemperature: ADS122C04_getConversionData failed");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readInternalTemperature: ADS122C04_getConversionData failed"));
+	  }
 		configure234wire(previousWireMode); // Attempt to restore the previous wire mode
 		return(ret_val);
 	}
@@ -358,12 +390,18 @@ float readInternalTemperature(void)
 	// Restore the previous wire mode
 	if ((configure234wire(previousWireMode)) == false)
 	{
-		debugPrintln("readInternalTemperature: configure234wire (2) failed");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("readInternalTemperature: configure234wire (2) failed"));
+	  }
 		return(ret_val);
 	}
 
-	debugPrint("readInternalTemperature: raw_temp (32-bit) = 0x");
-	debugPrintln(raw_temp, HEX);
+	if (_printDebug == true)
+  {
+		_debugPort->print(F("readInternalTemperature: raw_temp (32-bit) = 0x"));
+		_debugPort->println(raw_temp, HEX);
+  }
 
 	// The temperature is in the top 14 bits of the bottom 24 bits of raw_temp
 	int_temp.UINT16 = (uint16_t)(raw_temp >> 10); // Extract the 14-bit value
@@ -453,6 +491,11 @@ boolean SFE_QWIIC_PT100::enableInternalTempSensor(uint8_t enable)
 	if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
 		return(false);
 	ADS122C04_Reg.reg1.bit.TS = enable;
+	if (_printDebug == true)
+  {
+		_debugPort->print(F("enableInternalTempSensor: ADS122C04_Reg.reg1.bit.TS = 0x"));
+		_debugPort->println(ADS122C04_Reg.reg1.bit.TS, HEX);
+  }
 	return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
 }
 
@@ -489,6 +532,11 @@ boolean SFE_QWIIC_PT100::setIDACcurrent(uint8_t current)
 	if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
 		return(false);
 	ADS122C04_Reg.reg2.bit.IDAC = current;
+	if (_printDebug == true)
+  {
+		_debugPort->print(F("setIDACcurrent: ADS122C04_Reg.reg2.bit.IDAC = 0x"));
+		_debugPort->println(ADS122C04_Reg.reg2.bit.IDAC, HEX);
+  }
 	return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
 }
 
@@ -519,70 +567,75 @@ boolean SFE_QWIIC_PT100::checkDataReady(void)
 }
 
 // Get the input multiplexer configuration
-uint8_t SFE_QWIIC_PT100::getInputMultiplexer(void);
+uint8_t SFE_QWIIC_PT100::getInputMultiplexer(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg0.all);
 	return(ADS122C04_Reg.reg0.bit.MUX);
 }
 
 // Get the gain setting
-uint8_t SFE_QWIIC_PT100::getGain(void);
+uint8_t SFE_QWIIC_PT100::getGain(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg0.all);
 	return(ADS122C04_Reg.reg0.bit.GAIN);
 }
 
 // Get the Programmable Gain Amplifier status
-uint8_t SFE_QWIIC_PT100::getPGAstatus(void);
+uint8_t SFE_QWIIC_PT100::getPGAstatus(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg0.all);
 	return(ADS122C04_Reg.reg0.bit.PGA_BYPASS);
 }
 
 // Get the data rate (sample speed)
-uint8_t SFE_QWIIC_PT100::getDataRate(void);
+uint8_t SFE_QWIIC_PT100::getDataRate(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all);
 	return(ADS122C04_Reg.reg1.bit.DR);
 }
 
 // Get the operating mode (normal / turbo)
-uint8_t SFE_QWIIC_PT100::getOperatingMode(void);
+uint8_t SFE_QWIIC_PT100::getOperatingMode(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all);
 	return(ADS122C04_Reg.reg1.bit.MODE);
 }
 
 // Get the conversion mode (single-shot / continuous)
-uint8_t SFE_QWIIC_PT100::getConversionMode(void);
+uint8_t SFE_QWIIC_PT100::getConversionMode(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all);
 	return(ADS122C04_Reg.reg1.bit.CMBIT);
 }
 
 // Get the voltage reference configuration
-uint8_t SFE_QWIIC_PT100::getVoltageReference(void);
+uint8_t SFE_QWIIC_PT100::getVoltageReference(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all);
 	return(ADS122C04_Reg.reg1.bit.VREF);
 }
 
 // Get the internal temperature sensor status
-uint8_t SFE_QWIIC_PT100::getInternalTempSensorStatus(void);
+uint8_t SFE_QWIIC_PT100::getInternalTempSensorStatus(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all);
+	if (_printDebug == true)
+  {
+		_debugPort->print(F("getInternalTempSensorStatus: ADS122C04_Reg.reg1.bit.TS = 0x"));
+		_debugPort->println(ADS122C04_Reg.reg1.bit.TS, HEX);
+  }
 	return(ADS122C04_Reg.reg1.bit.TS);
 }
 
 // Get the data counter status
-uint8_t SFE_QWIIC_PT100::getDataCounter(void);
+uint8_t SFE_QWIIC_PT100::getDataCounter(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all);
 	return(ADS122C04_Reg.reg2.bit.DCNT);
 }
 
 // Get the data integrity check configuration
-uint8_t SFE_QWIIC_PT100::getDataIntegrityCheck(void);
+uint8_t SFE_QWIIC_PT100::getDataIntegrityCheck(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all);
 	return(ADS122C04_Reg.reg2.bit.CRC);
@@ -599,6 +652,11 @@ uint8_t SFE_QWIIC_PT100::getBurnOutCurrent(void)
 uint8_t SFE_QWIIC_PT100::getIDACcurrent(void)
 {
 	ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all);
+	if (_printDebug == true)
+  {
+		_debugPort->print(F("getIDACcurrent: ADS122C04_Reg.reg2.bit.IDAC = 0x"));
+		_debugPort->println(ADS122C04_Reg.reg2.bit.IDAC, HEX);
+  }
 	return(ADS122C04_Reg.reg2.bit.IDAC);
 }
 
@@ -649,6 +707,18 @@ boolean SFE_QWIIC_PT100::ADS122C04_init(ADS122C04_initParam *param)
 	ret_val &= ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all);
 	ret_val &= ADS122C04_writeReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all);
 
+	if (_printDebug == true)
+  {
+		_debugPort->print(F("ADS122C04_init: ConfigReg0 = 0x"));
+		_debugPort->print(ADS122C04_Reg.reg0.all, HEX);
+		_debugPort->print(F(" ConfigReg1 = 0x"));
+		_debugPort->print(ADS122C04_Reg.reg1.all, HEX);
+		_debugPort->print(F(" ConfigReg2 = 0x"));
+		_debugPort->print(ADS122C04_Reg.reg2.all, HEX);
+		_debugPort->print(F(" ConfigReg3 = 0x"));
+		_debugPort->println(ADS122C04_Reg.reg3.all, HEX);
+  }
+
 	return(ret_val);
 }
 
@@ -684,18 +754,24 @@ boolean SFE_QWIIC_PT100::ADS122C04_readReg(uint8_t reg, uint8_t *readValue)
 
 	if (_i2cPort->endTransmission(false) != 0)    //Do not release bus
 	{
-		debugPrintln("ADS122C04_readReg: sensor did not ACK");
+		if (_printDebug == true)
+	  {
+			_debugPort->println(F("ADS122C04_readReg: sensor did not ACK"));
+	  }
     return (false); //Sensor did not ACK
 	}
 
-	_i2cPort->requestFrom((uint8_t)_deviceAaddress, (uint8_t)1); // Request one byte
+	_i2cPort->requestFrom((uint8_t)_deviceAddress, (uint8_t)1); // Request one byte
   if (_i2cPort->available() >= 1)
   {
-    readValue = _i2cPort->read();
+    *readValue = _i2cPort->read();
 		return(true);
 	}
 
-	debugPrintln("ADS122C04_readReg: requestFrom returned no data");
+	if (_printDebug == true)
+	{
+		_debugPort->println(F("ADS122C04_readReg: requestFrom returned no data"));
+	}
 	return(false);
 }
 
@@ -728,11 +804,14 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionDataWithCount(uint32_t *conversi
 
 	if (_i2cPort->endTransmission(false) != 0)    //Do not release bus
 	{
-		debugPrintln("ADS122C04_getConversionDataWithCount: sensor did not ACK");
+		if (_printDebug == true)
+		{
+			_debugPort->println(F("ADS122C04_getConversionDataWithCount: sensor did not ACK"));
+		}
     return(false); //Sensor did not ACK
 	}
 
-	_i2cPort->requestFrom((uint8_t)_deviceAaddress, (uint8_t)4); // Request four bytes
+	_i2cPort->requestFrom((uint8_t)_deviceAddress, (uint8_t)4); // Request four bytes
 
   if (_i2cPort->available() >= 4)
   {
@@ -743,7 +822,10 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionDataWithCount(uint32_t *conversi
 	}
 	else
 	{
-		debugPrintln("ADS122C04_getConversionDataWithCount: requestFrom failed");
+		if (_printDebug == true)
+		{
+			_debugPort->println(F("ADS122C04_getConversionDataWithCount: requestFrom failed"));
+		}
 		return(false);
 	}
 
@@ -766,11 +848,14 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionData(uint32_t *conversionData)
 
 	if (_i2cPort->endTransmission(false) != 0)    //Do not release bus
 	{
-		debugPrintln("ADS122C04_getConversionData: sensor did not ACK");
+		if (_printDebug == true)
+		{
+			_debugPort->println(F("ADS122C04_getConversionData: sensor did not ACK"));
+		}
     return(false); //Sensor did not ACK
 	}
 
-	_i2cPort->requestFrom((uint8_t)_deviceAaddress, (uint8_t)3); // Request three bytes
+	_i2cPort->requestFrom((uint8_t)_deviceAddress, (uint8_t)3); // Request three bytes
 
   if (_i2cPort->available() >= 3)
   {
@@ -780,7 +865,10 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionData(uint32_t *conversionData)
 	}
 	else
 	{
-		debugPrintln("ADS122C04_getConversionData: requestFrom failed");
+		if (_printDebug == true)
+		{
+			_debugPort->println(F("ADS122C04_getConversionData: requestFrom failed"));
+		}
 		return(false);
 	}
 
