@@ -3,7 +3,7 @@
   TI ADS122C04 24-Bit 4-Channel 2-kSPS Delta-Sigma ADC With I2C Interface
 
   SparkFun sells these at its website: www.sparkfun.com
-	Do you like this library? Help support SparkFun. Buy a board!
+  Do you like this library? Help support SparkFun. Buy a board!
 
   Written by: Paul Clark (PaulZC)
   Date: May 4th 2020
@@ -17,21 +17,21 @@
   http://www.ti.com/lit/zip/tidcee5
 
   The MIT License (MIT)
-	Copyright (c) 2020 Paul Clark
-	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-	associated documentation files (the "Software"), to deal in the Software without restriction,
-	including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-	and/or sell copies of the Software, and to permit persons to whom the Software is furnished to
-	do so, subject to the following conditions:
+  Copyright (c) 2020 Paul Clark
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  associated documentation files (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the Software is furnished to
+  do so, subject to the following conditions:
 
-	The above copyright notice and this permission notice shall be included in all copies or substantial
-	portions of the Software.
+  The above copyright notice and this permission notice shall be included in all copies or substantial
+  portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-	NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #ifndef QWIIC_PT100_ARDUINO_LIBRARY_H
@@ -104,150 +104,6 @@
 #define ADS122C04_CONFIG_1_REG      1 // Configuration Register 1
 #define ADS122C04_CONFIG_2_REG      2 // Configuration Register 2
 #define ADS122C04_CONFIG_3_REG      3 // Configuration Register 3
-
-/*
-
-// Configuration Register 0
-// ADS122C04 Table 19 in Datasheet
-
-// Input Multiplexer Configuration
-#define ADS122C04_MUX_MASK          0xf0
-#define ADS122C04_MUX_SHIFT         4
-#define ADS122C04_MUX_AIN0_AIN1     (0x0 << ADS122C04_MUX_SHIFT)    //default
-#define ADS122C04_MUX_AIN0_AIN2     (0x1 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN0_AIN3     (0x2 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN1_AIN0     (0x3 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN1_AIN2     (0x4 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN1_AIN3     (0x5 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN2_AIN3     (0x6 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN3_AIN2     (0x7 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN0_AVSS     (0x8 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN1_AVSS     (0x9 << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN2_AVSS     (0xa << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AIN3_AVSS     (0xb << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_REFPmREFN     (0xc << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_AVDDmAVSS     (0xd << ADS122C04_MUX_SHIFT)
-#define ADS122C04_MUX_SHORTED       (0xe << ADS122C04_MUX_SHIFT)
-
-// Gain Configuration
-#define ADS122C04_GAIN_MASK         0x0e
-#define ADS122C04_GAIN_SHIFT        1
-#define ADS122C04_GAIN_1            (0x0 << ADS122C04_GAIN_SHIFT)
-#define ADS122C04_GAIN_2            (0x1 << ADS122C04_GAIN_SHIFT)
-#define ADS122C04_GAIN_4            (0x2 << ADS122C04_GAIN_SHIFT)
-#define ADS122C04_GAIN_8            (0x3 << ADS122C04_GAIN_SHIFT)
-#define ADS122C04_GAIN_16           (0x4 << ADS122C04_GAIN_SHIFT)
-#define ADS122C04_GAIN_32           (0x5 << ADS122C04_GAIN_SHIFT)
-#define ADS122C04_GAIN_64           (0x6 << ADS122C04_GAIN_SHIFT)
-#define ADS122C04_GAIN_128          (0x7 << ADS122C04_GAIN_SHIFT)
-
-// PGA Bypass
-#define ADS122C04_PGA_ENABLED       1
-#define ADS122C04_PGA_DISABLED      0
-
-// Configuration Register 1
-// ADS122C04 Table 19 in Datasheet
-
-// Data Rate
-#define ADS122C04_DATA_RATE_MASK    0xe0
-#define ADS122C04_DATA_RATE_SHIFT   5
-// Turbo mode = Normal mode * 2 (Samples per Second)
-// Normal mode
-#define ADS122C04_DATA_RATE_20SPS   (0 << ADS122C04_DATA_RATE_SHIFT)
-#define ADS122C04_DATA_RATE_45SPS   (1 << ADS122C04_DATA_RATE_SHIFT)
-#define ADS122C04_DATA_RATE_90SPS   (2 << ADS122C04_DATA_RATE_SHIFT)
-#define ADS122C04_DATA_RATE_175SPS  (3 << ADS122C04_DATA_RATE_SHIFT)
-#define ADS122C04_DATA_RATE_330SPS  (4 << ADS122C04_DATA_RATE_SHIFT)
-#define ADS122C04_DATA_RATE_600SPS  (5 << ADS122C04_DATA_RATE_SHIFT)
-#define ADS122C04_DATA_RATE_1000SPS (6 << ADS122C04_DATA_RATE_SHIFT)
-
-// Operating Mode
-#define ADS122C04_OP_MODE_MASK      0x10
-#define ADS122C04_OP_MODE_SHIFT     4
-#define ADS122C04_OP_MODE_NORMAL    (0 << ADS122C04_OP_MODE_SHIFT)
-#define ADS122C04_OP_MODE_TURBO     (1 << ADS122C04_OP_MODE_SHIFT)
-
-// Conversion Mode
-#define ADS122C04_CONVERSION_MODE_MASK          0x08
-#define ADS122C04_CONVERSION_MODE_SHIFT         3
-#define ADS122C04_CONVERSION_MODE_SINGLE_SHOT   (0 << ADS122C04_CONVERSION_MODE_SHIFT)
-#define ADS122C04_CONVERSION_MODE_CONTINUOUS    (1 << ADS122C04_CONVERSION_MODE_SHIFT)
-
-// Voltage Reference Selection
-#define ADS122C04_VREF_MASK                0x06
-#define ADS122C04_VREF_SHIFT               1
-#define ADS122C04_VREF_INTERNAL            (0 << ADS122C04_VREF_SHIFT)  //2.048V internal
-#define ADS122C04_VREF_EXT_REF_PINS        (1 << ADS122C04_VREF_SHIFT)  //REFp and REFn external
-#define ADS122C04_VREF_AVDD                (2 << ADS122C04_VREF_SHIFT)  //Analog Supply AVDD and AVSS
-
-// Temperature Sensor Mode
-#define ADS122C04_TEMP_SENSOR_ON           1
-#define ADS122C04_TEMP_SENSOR_OFF          0
-
-// Configuration Register 2
-// ADS122C04 Table 22 in Datasheet
-
-// Conversion Result Ready Flag (READ ONLY)
-#define ADS122C04_DRDY_MASK                0x80
-#define ADS122C04_DRDY_SHIFT               7
-
-// Data Counter Enable
-#define ADS122C04_DCNT_MASK                0x40
-#define ADS122C04_DCNT_SHIFT               6
-#define ADS122C04_DCNT_DISABLE             (0 << ADS122C04_DCNT_SHIFT)
-#define ADS122C04_DCNT_ENABLE              (1 << ADS122C04_DCNT_SHIFT)
-
-// Data Integrity Check Enable
-#define ADS122C04_CRC_MASK                 0x30
-#define ADS122C04_CRC_SHIFT                4
-#define ADS122C04_CRC_DISABLED             (0 << ADS122C04_CRC_SHIFT)
-#define ADS122C04_CRC_INVERTED             (1 << ADS122C04_CRC_SHIFT)
-#define ADS122C04_CRC_CRC16_ENABLED        (2 << ADS122C04_CRC_SHIFT)
-
-// Burn-Out Current Source
-#define ADS122C04_BURN_OUT_MASK            0x08
-#define ADS122C04_BURN_OUT_SHIFT           3
-#define ADS122C04_BURN_OUT_CURRENT_ON      (1 << ADS122C04_BURN_OUT_SHIFT)
-#define ADS122C04_BURN_OUT_CURRENT_OFF     (0 << ADS122C04_BURN_OUT_SHIFT)
-
-// IDAC Current Setting
-#define ADS122C04_IDAC_CURRENT_MASK        0x07
-#define ADS122C04_IDAC_CURRENT_SHIFT       0
-#define ADS122C04_IDAC_CURRENT_OFF         (0 << ADS122C04_IDAC_CURRENT_SHIFT)
-#define ADS122C04_IDAC_CURRENT_10_UA       (1 << ADS122C04_IDAC_CURRENT_SHIFT)
-#define ADS122C04_IDAC_CURRENT_50_UA       (2 << ADS122C04_IDAC_CURRENT_SHIFT)
-#define ADS122C04_IDAC_CURRENT_100_UA      (3 << ADS122C04_IDAC_CURRENT_SHIFT)
-#define ADS122C04_IDAC_CURRENT_250_UA      (4 << ADS122C04_IDAC_CURRENT_SHIFT)
-#define ADS122C04_IDAC_CURRENT_500_UA      (5 << ADS122C04_IDAC_CURRENT_SHIFT)
-#define ADS122C04_IDAC_CURRENT_1000_UA     (6 << ADS122C04_IDAC_CURRENT_SHIFT)
-#define ADS122C04_IDAC_CURRENT_1500_UA     (7 << ADS122C04_IDAC_CURRENT_SHIFT)
-
-// Configuration Register 3
-// ADS122C04 Table 23 in Datasheet
-
-// IDAC1 Routing Configuration
-#define ADS122C04_IDAC1_MUX_MASK           0xe0
-#define ADS122C04_IDAC1_MUX_SHIFT          5
-#define ADS122C04_IDAC1_DISABLED           (0 << ADS122C04_IDAC1_MUX_SHIFT)
-#define ADS122C04_IDAC1_AIN0               (1 << ADS122C04_IDAC1_MUX_SHIFT)
-#define ADS122C04_IDAC1_AIN1               (2 << ADS122C04_IDAC1_MUX_SHIFT)
-#define ADS122C04_IDAC1_AIN2               (3 << ADS122C04_IDAC1_MUX_SHIFT)
-#define ADS122C04_IDAC1_AIN3               (4 << ADS122C04_IDAC1_MUX_SHIFT)
-#define ADS122C04_IDAC1_REFP               (5 << ADS122C04_IDAC1_MUX_SHIFT)
-#define ADS122C04_IDAC1_REFN               (6 << ADS122C04_IDAC1_MUX_SHIFT)
-
-// IDAC2 Routing Configuration
-#define ADS122C04_IDAC2_MUX_MASK           0x1c
-#define ADS122C04_IDAC2_MUX_SHIFT          2
-#define ADS122C04_IDAC2_DISABLED           (0 << ADS122C04_IDAC2_MUX_SHIFT)
-#define ADS122C04_IDAC2_AIN0               (1 << ADS122C04_IDAC2_MUX_SHIFT)
-#define ADS122C04_IDAC2_AIN1               (2 << ADS122C04_IDAC2_MUX_SHIFT)
-#define ADS122C04_IDAC2_AIN2               (3 << ADS122C04_IDAC2_MUX_SHIFT)
-#define ADS122C04_IDAC2_AIN3               (4 << ADS122C04_IDAC2_MUX_SHIFT)
-#define ADS122C04_IDAC2_REFP               (5 << ADS122C04_IDAC2_MUX_SHIFT)
-#define ADS122C04_IDAC2_REFN               (6 << ADS122C04_IDAC2_MUX_SHIFT)
-
-*/
 
 // Unshifted register definitions
 // The bit field register definitions will do the bit shifting
@@ -422,7 +278,7 @@ typedef struct ADS122C04Reg{
   union CONFIG_REG_1_U reg1;
   union CONFIG_REG_2_U reg2;
   union CONFIG_REG_3_U reg3;
-}ADS122C04Reg_t;
+} ADS122C04Reg_t;
 
 // Union for the 14-bit internal Temperature
 // To simplify converting from uint16_t to int16_t
@@ -461,13 +317,13 @@ typedef struct{
 class SFE_QWIIC_PT100
 {
 public:
-	SFE_QWIIC_PT100(void);
+  SFE_QWIIC_PT100(void);
 
   //By default use the default I2C address, and use Wire port
-	boolean begin(uint8_t deviceAddress = 0x45, TwoWire &wirePort = Wire); //Returns true if module is detected
+  boolean begin(uint8_t deviceAddress = 0x45, TwoWire &wirePort = Wire); //Returns true if module is detected
 
   //Returns true if device answers on _deviceAddress
-	boolean isConnected(void);
+  boolean isConnected(void);
 
   void enableDebugging(Stream &debugPort = Serial); // enable debug messages
   void disableDebugging(); // disable debug messages
@@ -522,11 +378,11 @@ public:
 
 private:
   //Variables
-	TwoWire *_i2cPort;		//The generic connection to user's chosen I2C hardware
-	uint8_t _deviceAddress; //Keeps track of I2C address. setI2CAddress changes this.
+  TwoWire *_i2cPort;		//The generic connection to user's chosen I2C hardware
+  uint8_t _deviceAddress; //Keeps track of I2C address. setI2CAddress changes this.
 
-	Stream *_debugPort;			 //The stream to send debug messages to if enabled. Usually Serial.
-	boolean _printDebug = false; //Flag to print debugging variables
+  Stream *_debugPort;			 //The stream to send debug messages to if enabled. Usually Serial.
+  boolean _printDebug = false; //Flag to print debugging variables
 
   // Keep a copy of the wire mode so we can restore it after reading the internal temperature
   uint8_t _wireMode = ADS122C04_4WIRE_MODE;
