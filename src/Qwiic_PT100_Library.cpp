@@ -856,7 +856,17 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionDataWithCount(uint32_t *conversi
     return(false); //Sensor did not ACK
   }
 
+  // Note: the next line will need to be changed if data integrity is enabled.
+  //       The code will need to request 6 bytes for CRC or 7 bytes for inverted data.
   _i2cPort->requestFrom((uint8_t)_deviceAddress, (uint8_t)4); // Request four bytes
+
+  if (_printDebug == true)
+  {
+    if (_i2cPort->available() == 3)
+    {
+      _debugPort->println(F("ADS122C04_getConversionDataWithCount: only 3 bytes available. Maybe DCNT is disabled?"));
+    }
+  }
 
   if (_i2cPort->available() >= 4)
   {
@@ -864,6 +874,17 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionDataWithCount(uint32_t *conversi
     RXByte[1] = _i2cPort->read(); // MSB
     RXByte[2] = _i2cPort->read();
     RXByte[3] = _i2cPort->read(); // LSB
+    if (_i2cPort->available() > 0)// Note: this _should_ be redundant
+    {
+      if (_printDebug == true)
+      {
+        _debugPort->println(F("ADS122C04_getConversionDataWithCount: excess bytes available. Maybe data integrity is enabled?"));
+      }
+      while (_i2cPort->available() > 0)
+      {
+        _i2cPort->read(); // Read and ignore excess bytes (presumably inverted data or CRC)
+      }
+    }
   }
   else
   {
@@ -900,6 +921,8 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionData(uint32_t *conversionData)
     return(false); //Sensor did not ACK
   }
 
+  // Note: the next line will need to be changed if data integrity is enabled.
+  //       The code will need to request 5 bytes for CRC or 6 bytes for inverted data.
   _i2cPort->requestFrom((uint8_t)_deviceAddress, (uint8_t)3); // Request three bytes
 
   if (_i2cPort->available() >= 3)
@@ -907,6 +930,17 @@ boolean SFE_QWIIC_PT100::ADS122C04_getConversionData(uint32_t *conversionData)
     RXByte[0] = _i2cPort->read(); // MSB
     RXByte[1] = _i2cPort->read();
     RXByte[2] = _i2cPort->read(); // LSB
+    if (_i2cPort->available() > 0) // Note: this _should_ be redundant
+    {
+      if (_printDebug == true)
+      {
+        _debugPort->println(F("ADS122C04_getConversionData: excess bytes available. Maybe data integrity is enabled?"));
+      }
+      while (_i2cPort->available() > 0)
+      {
+        _i2cPort->read(); // Read and ignore excess bytes (presumably inverted data or CRC)
+      }
+    }
   }
   else
   {
