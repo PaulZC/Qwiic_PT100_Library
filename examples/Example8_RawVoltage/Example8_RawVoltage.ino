@@ -4,11 +4,19 @@
   Date: May 5th, 2020
 
   This example demonstrates how to read the raw voltage from the ADS122C04 AIN1 and AIN0 pins.
-  The IDAC current source is disabled, the gain is set to 1 and the internal 2.048V reference
-  is selected.
-  readRawVoltage returns a int32_t. The LSB is 2.048 / 2^23 = 0.24414 uV (0.24414 microvolts)
 
-  Make sure the PCB is configured for 4-wire mode (split pads A, B and C are open)
+  The function readRawVoltage:
+  - disables the IDAC current source
+  - sets the gain to 1
+  - configures the chip to use the internal 2.048V reference
+
+  readRawVoltage returns a int32_t. The LSB is 2.048 / 2^23 = 0.24414 uV (0.24414 microvolts).
+
+  When readRawVoltage is complete, it automatically restores the previous mode (usually 4-wire).
+
+  If you want to configure the chip manually, see Example_ManualConfig.
+
+  Make sure the PCB is configured for 4-wire mode (split pads A, B and C are open).
   Feed the differential voltage you want to measure onto terminals 2 & 3. +/-2.048V maximum!
   Terminal 2 is positive. Terminal 3 is negative (connect to 0V if required).
 

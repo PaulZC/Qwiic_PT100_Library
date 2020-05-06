@@ -337,6 +337,10 @@ public:
   // The LSB is 2.048 / 2^23 = 0.24414 uV (0.24414 microvolts)
   int32_t readRawVoltage(void);
 
+  // Read the raw signed 24-bit ADC value as uint32_t
+  // The ADC data is returned in the least-significant 24-bits
+  uint32_t readADC(void);
+
   // Read the internal temperature (C)
   float readInternalTemperature(void);
 

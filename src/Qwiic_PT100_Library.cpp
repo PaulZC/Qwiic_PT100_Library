@@ -378,6 +378,26 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
   return(raw_v.INT32);
 }
 
+// Read the raw signed 24-bit ADC value as uint32_t
+// The ADC data is returned in the least-significant 24-bits
+// Higher functions will need to convert the result to (e.g.) int32_t
+uint32_t SFE_QWIIC_PT100::readADC(void)
+{
+  uint32_t ret_val; // The return value
+
+  // Read the conversion result
+  if(ADS122C04_getConversionData(&ret_val) == false)
+  {
+    if (_printDebug == true)
+    {
+      _debugPort->println(F("readADC: ADS122C04_getConversionData failed"));
+    }
+    return(0);
+  }
+
+  return(ret_val);
+}
+
 // Read the internal temperature
 float SFE_QWIIC_PT100::readInternalTemperature(void)
 {
