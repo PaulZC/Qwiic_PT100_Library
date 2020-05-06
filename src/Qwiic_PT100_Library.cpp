@@ -143,6 +143,24 @@ boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
 		initParams.routeIDAC2 = ADS122C04_IDAC2_DISABLED; // Disable IDAC2
 		_wireMode = ADS122C04_TEMPERATURE_MODE; // Update the wire mode
 	}
+	else if (wire_mode == ADS122C04_RAW_MODE) // Raw mode : disable the IDAC and use the internal reference
+	{
+		initParams.inputMux = ADS122C04_MUX_AIN0_AIN1; // Route AIN0 and AIN1 to AINP and AINN
+		initParams.gainLevel = ADS122C04_GAIN_1; // Set the gain to 1
+		initParams.pgaBypass = ADS122C04_PGA_DISABLED;
+		initParams.dataRate = ADS122C04_DATA_RATE_20SPS; // Set the data rate (samples per second) to 20
+		initParams.opMode = ADS122C04_OP_MODE_NORMAL; // Disable turbo mode
+		initParams.convMode = ADS122C04_CONVERSION_MODE_SINGLE_SHOT; // Use single shot mode
+		initParams.selectVref = ADS122C04_VREF_INTERNAL; // Use the internal 2.048V reference
+		initParams.tempSensorEn = ADS122C04_TEMP_SENSOR_OFF; // Disable the temperature sensor
+		initParams.dataCounterEn = ADS122C04_DCNT_DISABLE; // Disable the data counter
+		initParams.dataCRCen = ADS122C04_CRC_DISABLED; // Disable CRC checking
+		initParams.burnOutEn = ADS122C04_BURN_OUT_CURRENT_OFF; // Disable the burn-out current
+		initParams.idacCurrent = ADS122C04_IDAC_CURRENT_OFF; // Disable the IDAC current
+		initParams.routeIDAC1 = ADS122C04_IDAC1_DISABLED; // Disable IDAC1
+		initParams.routeIDAC2 = ADS122C04_IDAC2_DISABLED; // Disable IDAC2
+		_wireMode = ADS122C04_RAW_MODE; // Update the wire mode
+	}
 	else
 	{
 		if (_printDebug == true)
@@ -185,10 +203,10 @@ void SFE_QWIIC_PT100::debugPrint(char *message)
 //Safely print messages
 void SFE_QWIIC_PT100::debugPrintln(char *message)
 {
-  if (_printDebug == true)
-  {
-    _debugPort->println(message);
-  }
+	if (_printDebug == true)
+	{
+		_debugPort->println(message);
+	}
 }
 
 float SFE_QWIIC_PT100::readPT100Centigrade(void) // Read the temperature in Centigrade
@@ -232,6 +250,7 @@ float SFE_QWIIC_PT100::readPT100Centigrade(void) // Read the temperature in Cent
 	// The raw voltage is in the bottom 24 bits of raw_temp
 	// If we just do a <<8 we will multiply the result by 256
 	// Instead pad out the MSB with the MS bit of the 24 bits
+	// to preserve the two's complement
 	if ((raw_v.UINT32 & 0x00800000) == 0x00800000)
 	{
 		raw_v.UINT32 |= 0xFF000000;
@@ -295,6 +314,18 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
 	raw_voltage_union raw_v; // union to convert uint32_t to int32_t
 	unsigned long start_time = millis(); // Record the start time so we can timeout
 	boolean drdy = false; // DRDY (1 == new data is ready)
+	uint8_t previousWireMode = _wireMode; // Record the previous wire mode so we can restore it
+
+	// Configure the ADS122C04 for raw mode
+	// Disable the IDAC, use the internal 2.048V reference and set the gain to 1
+	if ((configure234wire(ADS122C04_RAW_MODE)) == false)
+	{
+		if (_printDebug == true)
+		{
+			_debugPort->println(F("readRawVoltage: configure234wire (1) failed"));
+		}
+		return(0);
+	}
 
 	// Start the conversion (assumes we are using single shot mode)
 	start();
@@ -313,6 +344,7 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
 		{
 			_debugPort->println(F("readRawVoltage: checkDataReady timed out"));
 		}
+		configure234wire(previousWireMode); // Attempt to restore the previous wire mode
 		return(0);
 	}
 
@@ -323,12 +355,24 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
 		{
 			_debugPort->println(F("readRawVoltage: ADS122C04_getConversionData failed"));
 		}
+		configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+		return(0);
+	}
+
+	// Restore the previous wire mode
+	if ((configure234wire(previousWireMode)) == false)
+	{
+	if (_printDebug == true)
+		{
+			_debugPort->println(F("readRawVoltage: configure234wire (2) failed"));
+		}
 		return(0);
 	}
 
 	// The raw voltage is in the bottom 24 bits of raw_temp
 	// If we just do a <<8 we will multiply the result by 256
 	// Instead pad out the MSB with the MS bit of the 24 bits
+	// to preserve the two's complement
 	if ((raw_v.UINT32 & 0x00800000) == 0x00800000)
 		raw_v.UINT32 |= 0xFF000000;
 	return(raw_v.INT32);
@@ -409,6 +453,7 @@ float SFE_QWIIC_PT100::readInternalTemperature(void)
 	// The signed temperature is now in the bottom 14 bits of int_temp.UINT16
 	// If we just do a <<2 we will multiply the result by 4
 	// Instead we will pad out the two MS bits with the MS bit of the 14 bits
+	// to preserve the two's complement
 	if ((int_temp.UINT16 & 0x2000) == 0x2000) // Check if the MS bit is 1
 	{
 		int_temp.UINT16 |= 0xC000; // Value is negative so pad with 1's

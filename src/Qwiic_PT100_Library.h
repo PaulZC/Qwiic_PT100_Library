@@ -82,11 +82,12 @@
 // The maximum time we will wait for DRDY to go valid for a single conversion
 #define ADS122C04_CONVERSION_TIMEOUT 75
 
-// Define 2/3/4-Wire and Temperature modes
+// Define 2/3/4-Wire, Temperature and Raw modes
 #define ADS122C04_4WIRE_MODE         0x0
 #define ADS122C04_3WIRE_MODE         0x1
 #define ADS122C04_2WIRE_MODE         0x2
 #define ADS122C04_TEMPERATURE_MODE   0x3
+#define ADS122C04_RAW_MODE           0x4
 
 // ADS122C04 Table 16 in Datasheet
 #define ADS122C04_RESET_CMD          0x06     //0000 011x      Reset
@@ -332,7 +333,8 @@ public:
   float readPT100Fahrenheit(void); // Read the PT100 temperature in Fahrenheit
 
   // Read the raw signed 24-bit ADC value as int32_t
-  // The result needs to be multiplied by VREF / GAIN to convert to Volts
+  // This uses the internal 2.048V reference with the gain set to 1
+  // The LSB is 2.048 / 2^23 = 0.24414 uV (0.24414 microvolts)
   int32_t readRawVoltage(void);
 
   // Read the internal temperature (C)
