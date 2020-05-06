@@ -127,7 +127,7 @@ boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
   }
   else if (wire_mode == ADS122C04_TEMPERATURE_MODE) // Internal temperature mode
   {
-    initParams.inputMux = ADS122C04_MUX_AIN0_AIN1; // Route AIN0 and AIN1 to AINP and AINN
+    initParams.inputMux = ADS122C04_MUX_AIN1_AIN0; // Route AIN1 to AINP and AIN0 to AINN
     initParams.gainLevel = ADS122C04_GAIN_1; // Set the gain to 1
     initParams.pgaBypass = ADS122C04_PGA_DISABLED;
     initParams.dataRate = ADS122C04_DATA_RATE_20SPS; // Set the data rate (samples per second) to 20
@@ -145,7 +145,7 @@ boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
   }
   else if (wire_mode == ADS122C04_RAW_MODE) // Raw mode : disable the IDAC and use the internal reference
   {
-    initParams.inputMux = ADS122C04_MUX_AIN0_AIN1; // Route AIN0 and AIN1 to AINP and AINN
+    initParams.inputMux = ADS122C04_MUX_AIN1_AIN0; // Route AIN1 to AINP and AIN0 to AINN
     initParams.gainLevel = ADS122C04_GAIN_1; // Set the gain to 1
     initParams.pgaBypass = ADS122C04_PGA_DISABLED;
     initParams.dataRate = ADS122C04_DATA_RATE_20SPS; // Set the data rate (samples per second) to 20

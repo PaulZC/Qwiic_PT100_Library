@@ -46,7 +46,7 @@ void setup(void)
   // The ADS122C04 will now be configured for 4-wire mode.
   // We can override that using these commands:
 
-  mySensor.setInputMultiplexer(ADS122C04_MUX_AIN0_AIN1); // Route AIN0 and AIN1 to AINP and AINN
+  mySensor.setInputMultiplexer(ADS122C04_MUX_AIN1_AIN0); // Route AIN1 and AIN0 to AINP and AINN
   mySensor.setGain(ADS122C04_GAIN_1); // Set the gain to 1
   mySensor.enablePGA(ADS122C04_PGA_DISABLED); // Disable the Programmable Gain Amplifier
   mySensor.setDataRate(ADS122C04_DATA_RATE_20SPS); // Set the data rate (samples per second) to 20
@@ -85,7 +85,8 @@ void loop()
     return;
   }
 
-  // Read the rawADC data
+  // Read the raw ADC data
+  // The ADC data is returned in the least-significant 24-bits
   uint32_t raw_ADC_data = mySensor.readADC();
 
   // Print the raw ADC data
