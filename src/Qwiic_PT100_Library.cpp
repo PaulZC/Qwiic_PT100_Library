@@ -520,43 +520,43 @@ boolean SFE_QWIIC_PT100::enablePGA(uint8_t enable)
 // Set the data rate (sample speed)
 boolean SFE_QWIIC_PT100::setDataRate(uint8_t rate)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.DR = rate;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Configure the operating mode (normal / turbo)
 boolean SFE_QWIIC_PT100::setOperatingMode(uint8_t mode)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.MODE = mode;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Configure the conversion mode (single-shot / continuous)
 boolean SFE_QWIIC_PT100::setConversionMode(uint8_t mode)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.CMBIT = mode;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Configure the voltage reference
 boolean SFE_QWIIC_PT100::setVoltageReference(uint8_t ref)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.VREF = ref;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Enable / disable the internal temperature sensor
 boolean SFE_QWIIC_PT100::enableInternalTempSensor(uint8_t enable)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.TS = enable;
   if (_printDebug == true)
@@ -564,40 +564,40 @@ boolean SFE_QWIIC_PT100::enableInternalTempSensor(uint8_t enable)
     _debugPort->print(F("enableInternalTempSensor: ADS122C04_Reg.reg1.bit.TS = 0x"));
     _debugPort->println(ADS122C04_Reg.reg1.bit.TS, HEX);
   }
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Enable / disable the conversion data counter
 boolean SFE_QWIIC_PT100::setDataCounter(uint8_t enable)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.DCNT = enable;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Configure the data integrity check
 boolean SFE_QWIIC_PT100::setDataIntegrityCheck(uint8_t setting)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.CRC = setting;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Enable / disable the 10uA burn-out current source
 boolean SFE_QWIIC_PT100::setBurnOutCurrent(uint8_t enable)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.BCS = enable;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Configure the internal programmable current sources
 boolean SFE_QWIIC_PT100::setIDACcurrent(uint8_t current)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.IDAC = current;
   if (_printDebug == true)
@@ -605,25 +605,25 @@ boolean SFE_QWIIC_PT100::setIDACcurrent(uint8_t current)
     _debugPort->print(F("setIDACcurrent: ADS122C04_Reg.reg2.bit.IDAC = 0x"));
     _debugPort->println(ADS122C04_Reg.reg2.bit.IDAC, HEX);
   }
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Configure the IDAC1 routing
 boolean SFE_QWIIC_PT100::setIDAC1mux(uint8_t setting)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg3.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_3_REG, &ADS122C04_Reg.reg3.all)) == false)
     return(false);
   ADS122C04_Reg.reg3.bit.I1MUX = setting;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg3.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all));
 }
 
 // Configure the IDAC2 routing
 boolean SFE_QWIIC_PT100::setIDAC2mux(uint8_t setting)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg3.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_3_REG, &ADS122C04_Reg.reg3.all)) == false)
     return(false);
   ADS122C04_Reg.reg3.bit.I2MUX = setting;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg3.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all));
 }
 
 // Read Config Reg 2 and check the DRDY bit
