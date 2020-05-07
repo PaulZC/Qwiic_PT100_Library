@@ -5,6 +5,10 @@
 
   This example demonstrates how to use alternate PT100 I2C addresses and Wire ports
 
+  Please consult the Qwiic PT100 schematic for the address jumper settings
+
+  The PT100 will be configured for 4-wire mode
+
   Hardware Connections:
   Plug a Qwiic cable into the PT100 and a BlackBoard
   If you don't have a platform with a Qwiic connection use the SparkFun Qwiic Breadboard Jumper (https://www.sparkfun.com/products/14425)
@@ -35,7 +39,7 @@ void setup(void)
       ;
   }
 
-  mySensor.configure234wire(ADS122C04_4WIRE_MODE); // Make sure the PT100 is in 4-wire mode
+  mySensor.configureADCmode(ADS122C04_4WIRE_MODE); // Configure the PT100 for 4-wire mode
 
 }
 

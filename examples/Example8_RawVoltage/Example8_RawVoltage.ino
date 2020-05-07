@@ -12,8 +12,6 @@
 
   readRawVoltage returns a int32_t. The LSB is 2.048 / 2^23 = 0.24414 uV (0.24414 microvolts).
 
-  When readRawVoltage is complete, it automatically restores the previous mode (usually 4-wire).
-
   If you want to configure the chip manually, see Example_ManualConfig.
 
   Make sure the PCB is configured for 4-wire mode (split pads A, B and C are open).
@@ -50,6 +48,8 @@ void setup(void)
       ;
   }
 
+  mySensor.configureADCmode(ADS122C04_RAW_MODE); // Configure the PT100 for raw mode
+
 }
 
 void loop()
@@ -63,13 +63,13 @@ void loop()
   // Convert to Volts (method 2)
   float volts_2 = ((float)raw_v) / 4096000;
 
-  // Print the temperature
+  // Print the temperature and voltage
   Serial.print(F("The raw voltage is 0x"));
   Serial.print(raw_v, HEX);
   Serial.print(F("\t"));
-  Serial.print(volts_1);
+  Serial.print(volts_1, 7); // Print the voltage with 7 decimal places
   Serial.print(F("V\t"));
-  Serial.print(volts_2);
+  Serial.print(volts_2, 7); // Print the voltage with 7 decimal places
   Serial.println(F("V"));
 
   delay(250); //Don't pound the I2C bus too hard

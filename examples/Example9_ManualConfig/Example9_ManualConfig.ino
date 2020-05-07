@@ -3,7 +3,7 @@
   By: Paul Clark (PaulZC)
   Date: May 5th, 2020
 
-  When the ADS122C04 is initialised by .begin, it is configured for 4-wire mode.
+  When the ADS122C04 is initialised by .begin, it is configured for raw mode (which disables the IDAC).
   If you want to manually configure the chip, you can. This example demonstrates how.
 
   The IDAC current source is disabled, the gain is set to 1 and the internal 2.048V reference is selected.
@@ -34,8 +34,6 @@ void setup(void)
 
   Wire.begin();
 
-  //mySensor.enableDebugging(); //Uncomment this line to enable debug messages on Serial
-
   if (mySensor.begin() == false) //Connect to the PT100 using the defaults: Address 0x45 and the Wire port
   {
     Serial.println(F("Qwiic PT100 not detected at default I2C address. Please check wiring. Freezing."));
@@ -43,8 +41,8 @@ void setup(void)
       ;
   }
 
-  // The ADS122C04 will now be configured for 4-wire mode.
-  // We can override that using these commands:
+  // The ADS122C04 will now be configured for raw mode.
+  // We can override the ADC mode using these commands:
 
   mySensor.setInputMultiplexer(ADS122C04_MUX_AIN1_AIN0); // Route AIN1 and AIN0 to AINP and AINN
   mySensor.setGain(ADS122C04_GAIN_1); // Set the gain to 1
@@ -61,6 +59,9 @@ void setup(void)
   mySensor.setIDAC1mux(ADS122C04_IDAC1_DISABLED); // Disable IDAC1
   mySensor.setIDAC2mux(ADS122C04_IDAC2_DISABLED); // Disable IDAC2
 
+  mySensor.enableDebugging(Serial); //Enable debug messages on Serial
+  mySensor.printADS122C04config(); //Print the configuration
+  mySensor.disableDebugging(); //Enable debug messages on Serial
 }
 
 void loop()
@@ -70,12 +71,12 @@ void loop()
   unsigned long start_time = millis(); // Record the start time so we can timeout
   boolean drdy = false; // DRDY (1 == new data is ready)
 
-  // Wait for DRDY to go valid
+  // Wait for DRDY to go valid (by reading Config Register 2)
   // (You could read the DRDY pin instead, especially if you are using continuous conversion mode.)
   while((drdy == false) && (millis() < (start_time + ADS122C04_CONVERSION_TIMEOUT)))
   {
     delay(5); // Don't pound the I2C bus too hard
-    drdy = mySensor.checkDataReady();
+    drdy = mySensor.checkDataReady(); // Read DRDY from Config Register 2
   }
 
   // Check if we timed out
@@ -89,9 +90,16 @@ void loop()
   // The ADC data is returned in the least-significant 24-bits
   uint32_t raw_ADC_data = mySensor.readADC();
 
+  // Mask off the least-significant 24-bits, just in case
+  raw_ADC_data &= 0x00ffffff;
+
+  // Use sprintf to convert raw_ADC_data to a char array
+  char myStr[7]; // Create storage for 6 hex digits plus a null
+  sprintf(myStr, "%06X", raw_ADC_data);
+
   // Print the raw ADC data
   Serial.print(F("The raw ADC data is 0x"));
-  Serial.println(raw_ADC_data, HEX);
+  Serial.println(myStr);
 
   delay(250); //Don't pound the I2C bus too hard
 }

@@ -38,7 +38,7 @@ void setup(void)
       ;
   }
 
-  mySensor.configure234wire(ADS122C04_2WIRE_MODE); // Set the PT100 to 2-wire mode
+  mySensor.configureADCmode(ADS122C04_2WIRE_MODE); // Configure the PT100 for 2-wire mode
 
 }
 

@@ -1,6 +1,9 @@
 /*
-  This is a library written for the Qwiic PT100 based on the
-  TI ADS122C04 24-Bit 4-Channel 2-kSPS Delta-Sigma ADC With I2C Interface
+  This is a library written for the TI ADS122C04
+  24-Bit 4-Channel 2-kSPS Delta-Sigma ADC With I2C Interface
+
+  It allows you to measure temperature very accurately using a
+  Platinum Resistance Thermometer
 
   SparkFun sells these at its website: www.sparkfun.com
   Do you like this library? Help support SparkFun. Buy a board!
@@ -17,7 +20,7 @@
   http://www.ti.com/lit/zip/tidcee5
 
   The MIT License (MIT)
-  Copyright (c) 2020 Paul Clark
+  Copyright (c) 2020 SparkFun Electronics
   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   associated documentation files (the "Software"), to deal in the Software without restriction,
   including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -48,7 +51,7 @@ boolean SFE_QWIIC_PT100::begin(uint8_t deviceAddress, TwoWire &wirePort)
   _deviceAddress = deviceAddress; //If provided, store the I2C address from user
   _i2cPort = &wirePort; //Grab which port the user wants us to use
   _printDebug = false; //Flag to print debugging variables
-  _wireMode = ADS122C04_4WIRE_MODE; //Default to 4-wire mode
+  _wireMode = ADS122C04_RAW_MODE; //Default to using 'safe' settings (disable the IDAC current sources)
 
   delay(1); // wait for power-on reset to complete (datasheet says we should do this)
 
@@ -63,11 +66,11 @@ boolean SFE_QWIIC_PT100::begin(uint8_t deviceAddress, TwoWire &wirePort)
 
   reset(); // reset the ADS122C04 (datasheet says we should do this)
 
-  return(configure234wire(ADS122C04_4WIRE_MODE)); // Configure the chip for 4-wire mode
+  return(configureADCmode(ADS122C04_RAW_MODE)); // Default to using 'safe' settings (disable the IDAC current sources)
 }
 
 // Configure the chip for the selected wire mode
-boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
+boolean SFE_QWIIC_PT100::configureADCmode(uint8_t wire_mode)
 {
   ADS122C04_initParam initParams; // Storage for the chip parameters
 
@@ -165,7 +168,7 @@ boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
   {
     if (_printDebug == true)
     {
-      _debugPort->println(F("configure234wire: unknown mode"));
+      _debugPort->println(F("configureADCmode: unknown mode"));
     }
     return(false);
   }
@@ -318,11 +321,11 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
 
   // Configure the ADS122C04 for raw mode
   // Disable the IDAC, use the internal 2.048V reference and set the gain to 1
-  if ((configure234wire(ADS122C04_RAW_MODE)) == false)
+  if ((configureADCmode(ADS122C04_RAW_MODE)) == false)
   {
     if (_printDebug == true)
     {
-      _debugPort->println(F("readRawVoltage: configure234wire (1) failed"));
+      _debugPort->println(F("readRawVoltage: configureADCmode (1) failed"));
     }
     return(0);
   }
@@ -344,7 +347,7 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
     {
       _debugPort->println(F("readRawVoltage: checkDataReady timed out"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(0);
   }
 
@@ -355,16 +358,16 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
     {
       _debugPort->println(F("readRawVoltage: ADS122C04_getConversionData failed"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(0);
   }
 
   // Restore the previous wire mode
-  if ((configure234wire(previousWireMode)) == false)
+  if ((configureADCmode(previousWireMode)) == false)
   {
   if (_printDebug == true)
     {
-      _debugPort->println(F("readRawVoltage: configure234wire (2) failed"));
+      _debugPort->println(F("readRawVoltage: configureADCmode (2) failed"));
     }
     return(0);
   }
@@ -410,11 +413,11 @@ float SFE_QWIIC_PT100::readInternalTemperature(void)
 
   // Enable the internal temperature sensor
   // Reading the ADC value will return the temperature
-  if ((configure234wire(ADS122C04_TEMPERATURE_MODE)) == false)
+  if ((configureADCmode(ADS122C04_TEMPERATURE_MODE)) == false)
   {
     if (_printDebug == true)
     {
-      _debugPort->println(F("readInternalTemperature: configure234wire (1) failed"));
+      _debugPort->println(F("readInternalTemperature: configureADCmode (1) failed"));
     }
     return(ret_val);
   }
@@ -436,7 +439,7 @@ float SFE_QWIIC_PT100::readInternalTemperature(void)
     {
       _debugPort->println(F("readInternalTemperature: checkDataReady timed out"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(ret_val);
   }
 
@@ -447,16 +450,16 @@ float SFE_QWIIC_PT100::readInternalTemperature(void)
     {
       _debugPort->println(F("readInternalTemperature: ADS122C04_getConversionData failed"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(ret_val);
   }
 
   // Restore the previous wire mode
-  if ((configure234wire(previousWireMode)) == false)
+  if ((configureADCmode(previousWireMode)) == false)
   {
   if (_printDebug == true)
     {
-      _debugPort->println(F("readInternalTemperature: configure234wire (2) failed"));
+      _debugPort->println(F("readInternalTemperature: configureADCmode (2) failed"));
     }
     return(ret_val);
   }
@@ -517,43 +520,43 @@ boolean SFE_QWIIC_PT100::enablePGA(uint8_t enable)
 // Set the data rate (sample speed)
 boolean SFE_QWIIC_PT100::setDataRate(uint8_t rate)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.DR = rate;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Configure the operating mode (normal / turbo)
 boolean SFE_QWIIC_PT100::setOperatingMode(uint8_t mode)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.MODE = mode;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Configure the conversion mode (single-shot / continuous)
 boolean SFE_QWIIC_PT100::setConversionMode(uint8_t mode)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.CMBIT = mode;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Configure the voltage reference
 boolean SFE_QWIIC_PT100::setVoltageReference(uint8_t ref)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.VREF = ref;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Enable / disable the internal temperature sensor
 boolean SFE_QWIIC_PT100::enableInternalTempSensor(uint8_t enable)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg1.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_1_REG, &ADS122C04_Reg.reg1.all)) == false)
     return(false);
   ADS122C04_Reg.reg1.bit.TS = enable;
   if (_printDebug == true)
@@ -561,40 +564,40 @@ boolean SFE_QWIIC_PT100::enableInternalTempSensor(uint8_t enable)
     _debugPort->print(F("enableInternalTempSensor: ADS122C04_Reg.reg1.bit.TS = 0x"));
     _debugPort->println(ADS122C04_Reg.reg1.bit.TS, HEX);
   }
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg1.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all));
 }
 
 // Enable / disable the conversion data counter
 boolean SFE_QWIIC_PT100::setDataCounter(uint8_t enable)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.DCNT = enable;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Configure the data integrity check
 boolean SFE_QWIIC_PT100::setDataIntegrityCheck(uint8_t setting)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.CRC = setting;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Enable / disable the 10uA burn-out current source
 boolean SFE_QWIIC_PT100::setBurnOutCurrent(uint8_t enable)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.BCS = enable;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Configure the internal programmable current sources
 boolean SFE_QWIIC_PT100::setIDACcurrent(uint8_t current)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg2.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_2_REG, &ADS122C04_Reg.reg2.all)) == false)
     return(false);
   ADS122C04_Reg.reg2.bit.IDAC = current;
   if (_printDebug == true)
@@ -602,25 +605,25 @@ boolean SFE_QWIIC_PT100::setIDACcurrent(uint8_t current)
     _debugPort->print(F("setIDACcurrent: ADS122C04_Reg.reg2.bit.IDAC = 0x"));
     _debugPort->println(ADS122C04_Reg.reg2.bit.IDAC, HEX);
   }
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg2.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all));
 }
 
 // Configure the IDAC1 routing
 boolean SFE_QWIIC_PT100::setIDAC1mux(uint8_t setting)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg3.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_3_REG, &ADS122C04_Reg.reg3.all)) == false)
     return(false);
   ADS122C04_Reg.reg3.bit.I1MUX = setting;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg3.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all));
 }
 
 // Configure the IDAC2 routing
 boolean SFE_QWIIC_PT100::setIDAC2mux(uint8_t setting)
 {
-  if ((ADS122C04_readReg(ADS122C04_CONFIG_0_REG, &ADS122C04_Reg.reg3.all)) == false)
+  if ((ADS122C04_readReg(ADS122C04_CONFIG_3_REG, &ADS122C04_Reg.reg3.all)) == false)
     return(false);
   ADS122C04_Reg.reg3.bit.I2MUX = setting;
-  return(ADS122C04_writeReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg3.all));
+  return(ADS122C04_writeReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all));
 }
 
 // Read Config Reg 2 and check the DRDY bit
@@ -772,19 +775,61 @@ boolean SFE_QWIIC_PT100::ADS122C04_init(ADS122C04_initParam *param)
   ret_val &= ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all);
   ret_val &= ADS122C04_writeReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all);
 
-  if (_printDebug == true)
-  {
-    _debugPort->print(F("ADS122C04_init: ConfigReg0 = 0x"));
-    _debugPort->print(ADS122C04_Reg.reg0.all, HEX);
-    _debugPort->print(F(" ConfigReg1 = 0x"));
-    _debugPort->print(ADS122C04_Reg.reg1.all, HEX);
-    _debugPort->print(F(" ConfigReg2 = 0x"));
-    _debugPort->print(ADS122C04_Reg.reg2.all, HEX);
-    _debugPort->print(F(" ConfigReg3 = 0x"));
-    _debugPort->println(ADS122C04_Reg.reg3.all, HEX);
-  }
+  // Read and print the new configuration (if enableDebugging has been called)
+  printADS122C04config();
 
   return(ret_val);
+}
+
+// Debug print of the ADS122C04 configuration
+void SFE_QWIIC_PT100::printADS122C04config(void)
+{
+  if (_printDebug == true)
+  {
+    boolean successful = true; // Flag to show if the four readRegs were successful
+    // (If any one readReg returns false, success will be false)
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg0.all);
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all);
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all);
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all);
+
+    if (successful == false)
+    {
+      _debugPort->println(F("printADS122C04config: readReg failed"));
+      return;
+    }
+    else
+    {
+      _debugPort->print(F("ConfigReg0: MUX="));
+      _debugPort->print(ADS122C04_Reg.reg0.bit.MUX);
+      _debugPort->print(F(" GAIN="));
+      _debugPort->print(ADS122C04_Reg.reg0.bit.GAIN);
+      _debugPort->print(F(" PGA_BYPASS="));
+      _debugPort->println(ADS122C04_Reg.reg0.bit.PGA_BYPASS);
+      _debugPort->print(F("ConfigReg1: DR="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.DR);
+      _debugPort->print(F(" MODE="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.MODE);
+      _debugPort->print(F(" CMBIT="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.CMBIT);
+      _debugPort->print(F(" VREF="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.VREF);
+      _debugPort->print(F(" TS="));
+      _debugPort->println(ADS122C04_Reg.reg1.bit.TS);
+      _debugPort->print(F("ConfigReg2: DCNT="));
+      _debugPort->print(ADS122C04_Reg.reg2.bit.DCNT);
+      _debugPort->print(F(" CRC="));
+      _debugPort->print(ADS122C04_Reg.reg2.bit.CRC);
+      _debugPort->print(F(" BCS="));
+      _debugPort->print(ADS122C04_Reg.reg2.bit.BCS);
+      _debugPort->print(F(" IDAC="));
+      _debugPort->println(ADS122C04_Reg.reg2.bit.IDAC);
+      _debugPort->print(F("ConfigReg3: I1MUX="));
+      _debugPort->print(ADS122C04_Reg.reg3.bit.I1MUX);
+      _debugPort->print(F(" I2MUX="));
+      _debugPort->println(ADS122C04_Reg.reg3.bit.I2MUX);
+    }
+  }
 }
 
 boolean SFE_QWIIC_PT100::reset(void)

@@ -1,6 +1,9 @@
 /*
-  This is a library written for the Qwiic PT100 based on the
-  TI ADS122C04 24-Bit 4-Channel 2-kSPS Delta-Sigma ADC With I2C Interface
+  This is a library written for the TI ADS122C04
+  24-Bit 4-Channel 2-kSPS Delta-Sigma ADC With I2C Interface
+
+  It allows you to measure temperature very accurately using a
+  Platinum Resistance Thermometer
 
   SparkFun sells these at its website: www.sparkfun.com
   Do you like this library? Help support SparkFun. Buy a board!
@@ -17,7 +20,7 @@
   http://www.ti.com/lit/zip/tidcee5
 
   The MIT License (MIT)
-  Copyright (c) 2020 Paul Clark
+  Copyright (c) 2020 SparkFun Electronics
   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   associated documentation files (the "Software"), to deal in the Software without restriction,
   including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -45,38 +48,13 @@
 
 #include <Wire.h>
 
-//Platform specific configurations
-
-//Define the size of the I2C buffer based on the platform the user has
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
-
-//I2C_BUFFER_LENGTH is defined in Wire.H
-#define I2C_BUFFER_LENGTH BUFFER_LENGTH
-
-#elif defined(__SAMD21G18A__)
-
-//SAMD21 uses RingBuffer.h
-#define I2C_BUFFER_LENGTH SERIAL_BUFFER_SIZE
-
-//#elif __MK20DX256__
-//Teensy
-
-#endif
-
-#ifndef I2C_BUFFER_LENGTH
-
-//The catch-all default is 32
-#define I2C_BUFFER_LENGTH 32
-//#define I2C_BUFFER_LENGTH 16 //For testing on Artemis
-
-#endif
-
+// Platform specific configurations
 // Define Serial for SparkFun SAMD based boards.
 // You may need to comment these three lines if your SAMD board supports Serial (not SerialUSB)
 #if defined(ARDUINO_ARCH_SAMD)
 #define Serial SerialUSB
 #endif
+
 
 // Single Conversion Timeout (millis)
 // The maximum time we will wait for DRDY to go valid for a single conversion
@@ -348,21 +326,23 @@ public:
   boolean start(void); // Start a conversion
   boolean powerdown(void); // Put the chip into low power mode
 
-  boolean configure234wire(uint8_t wire_mode = ADS122C04_4WIRE_MODE); // Configure the chip for the chosen mode
+  // Default to using 'safe' settings (disable the IDAC current sources)
+  boolean configureADCmode(uint8_t wire_mode = ADS122C04_RAW_MODE); // Configure the chip for the chosen mode
 
+  // Default to using 'safe' settings (disable the IDAC current sources)
   boolean setInputMultiplexer(uint8_t mux_config = ADS122C04_MUX_AIN1_AIN0); // Configure the input multiplexer
-  boolean setGain(uint8_t gain_config = ADS122C04_GAIN_8); // Configure the gain
-  boolean enablePGA(uint8_t enable = ADS122C04_PGA_ENABLED); // Enable/disable the Programmable Gain Amplifier
+  boolean setGain(uint8_t gain_config = ADS122C04_GAIN_1); // Configure the gain
+  boolean enablePGA(uint8_t enable = ADS122C04_PGA_DISABLED); // Enable/disable the Programmable Gain Amplifier
   boolean setDataRate(uint8_t rate = ADS122C04_DATA_RATE_20SPS); // Set the data rate (sample speed)
   boolean setOperatingMode(uint8_t mode = ADS122C04_OP_MODE_NORMAL); // Configure the operating mode (normal / turbo)
   boolean setConversionMode(uint8_t mode = ADS122C04_CONVERSION_MODE_SINGLE_SHOT); // Configure the conversion mode (single-shot / continuous)
-  boolean setVoltageReference(uint8_t ref = ADS122C04_VREF_EXT_REF_PINS); // Configure the voltage reference
+  boolean setVoltageReference(uint8_t ref = ADS122C04_VREF_INTERNAL); // Configure the voltage reference
   boolean enableInternalTempSensor(uint8_t enable = ADS122C04_TEMP_SENSOR_OFF); // Enable / disable the internal temperature sensor
   boolean setDataCounter(uint8_t enable = ADS122C04_DCNT_DISABLE); // Enable / disable the conversion data counter
   boolean setDataIntegrityCheck(uint8_t setting = ADS122C04_CRC_DISABLED); // Configure the data integrity check
   boolean setBurnOutCurrent(uint8_t enable = ADS122C04_BURN_OUT_CURRENT_OFF); // Enable / disable the 10uA burn-out current source
-  boolean setIDACcurrent(uint8_t current = ADS122C04_IDAC_CURRENT_1000_UA); // Configure the internal programmable current sources
-  boolean setIDAC1mux(uint8_t setting = ADS122C04_IDAC1_AIN3); // Configure the IDAC1 routing
+  boolean setIDACcurrent(uint8_t current = ADS122C04_IDAC_CURRENT_OFF); // Configure the internal programmable current sources
+  boolean setIDAC1mux(uint8_t setting = ADS122C04_IDAC1_DISABLED); // Configure the IDAC1 routing
   boolean setIDAC2mux(uint8_t setting = ADS122C04_IDAC2_DISABLED); // Configure the IDAC2 routing
 
   boolean checkDataReady(void); // Check the status of the DRDY bit in Config Register 2
@@ -381,6 +361,9 @@ public:
   uint8_t getIDACcurrent(void); // Get the IDAC setting
   uint8_t getIDAC1mux(void); // Get the IDAC1 mux configuration
   uint8_t getIDAC2mux(void); // Get the IDAC2 mux configuration
+
+  // Print the ADS122C04 configuration (but only if enableDebugging has been called)
+  void printADS122C04config(void);
 
 private:
   //Variables
