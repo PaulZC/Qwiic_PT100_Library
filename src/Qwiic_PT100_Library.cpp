@@ -775,17 +775,8 @@ boolean SFE_QWIIC_PT100::ADS122C04_init(ADS122C04_initParam *param)
   ret_val &= ADS122C04_writeReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all);
   ret_val &= ADS122C04_writeReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all);
 
-  if (_printDebug == true)
-  {
-    _debugPort->print(F("ADS122C04_init: ConfigReg0 = 0x"));
-    _debugPort->print(ADS122C04_Reg.reg0.all, HEX);
-    _debugPort->print(F(" ConfigReg1 = 0x"));
-    _debugPort->print(ADS122C04_Reg.reg1.all, HEX);
-    _debugPort->print(F(" ConfigReg2 = 0x"));
-    _debugPort->print(ADS122C04_Reg.reg2.all, HEX);
-    _debugPort->print(F(" ConfigReg3 = 0x"));
-    _debugPort->println(ADS122C04_Reg.reg3.all, HEX);
-  }
+  // Read and print the new configuration (if enableDebugging has been called)
+  printADS122C04config();
 
   return(ret_val);
 }
