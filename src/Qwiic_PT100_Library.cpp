@@ -787,7 +787,7 @@ void SFE_QWIIC_PT100::printADS122C04config(void)
   if (_printDebug == true)
   {
     boolean successful = true; // Flag to show if the four readRegs were successful
-    // (If any one writeReg returns false, ret_val will be false)
+    // (If any one readReg returns false, success will be false)
     successful &= ADS122C04_readReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg0.all);
     successful &= ADS122C04_readReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all);
     successful &= ADS122C04_readReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all);
