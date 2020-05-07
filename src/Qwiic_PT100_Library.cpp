@@ -790,6 +790,57 @@ boolean SFE_QWIIC_PT100::ADS122C04_init(ADS122C04_initParam *param)
   return(ret_val);
 }
 
+// Debug print of the ADS122C04 configuration
+void SFE_QWIIC_PT100::printADS122C04config(void)
+{
+  if (_printDebug == true)
+  {
+    boolean successful = true; // Flag to show if the four readRegs were successful
+    // (If any one writeReg returns false, ret_val will be false)
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_0_REG, ADS122C04_Reg.reg0.all);
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_1_REG, ADS122C04_Reg.reg1.all);
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_2_REG, ADS122C04_Reg.reg2.all);
+    successful &= ADS122C04_readReg(ADS122C04_CONFIG_3_REG, ADS122C04_Reg.reg3.all);
+
+    if (successful == false)
+    {
+      _debugPort->println(F("printADS122C04config: readReg failed"));
+      return;
+    }
+    else
+    {
+      _debugPort->print(F("ConfigReg0: MUX="));
+      _debugPort->print(ADS122C04_Reg.reg0.bit.MUX);
+      _debugPort->print(F(" GAIN="));
+      _debugPort->print(ADS122C04_Reg.reg0.bit.GAIN);
+      _debugPort->print(F(" PGA_BYPASS="));
+      _debugPort->println(ADS122C04_Reg.reg0.bit.PGA_BYPASS);
+      _debugPort->print(F("ConfigReg1: DR="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.DR);
+      _debugPort->print(F(" MODE="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.MODE);
+      _debugPort->print(F(" CMBIT="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.CMBIT);
+      _debugPort->print(F(" VREF="));
+      _debugPort->print(ADS122C04_Reg.reg1.bit.VREF);
+      _debugPort->print(F(" TS="));
+      _debugPort->println(ADS122C04_Reg.reg1.bit.TS);
+      _debugPort->print(F("ConfigReg2: DCNT="));
+      _debugPort->print(ADS122C04_Reg.reg2.bit.DCNT);
+      _debugPort->print(F(" CRC="));
+      _debugPort->print(ADS122C04_Reg.reg2.bit.CRC);
+      _debugPort->print(F(" BCS="));
+      _debugPort->print(ADS122C04_Reg.reg2.bit.BCS);
+      _debugPort->print(F(" IDAC="));
+      _debugPort->println(ADS122C04_Reg.reg2.bit.IDAC);
+      _debugPort->print(F("ConfigReg3: I1MUX="));
+      _debugPort->print(ADS122C04_Reg.reg3.bit.I1MUX);
+      _debugPort->print(F(" I2MUX="));
+      _debugPort->println(ADS122C04_Reg.reg3.bit.I2MUX);
+    }
+  }
+}
+
 boolean SFE_QWIIC_PT100::reset(void)
 {
   return(ADS122C04_sendCommand(ADS122C04_RESET_CMD));

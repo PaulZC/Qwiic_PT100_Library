@@ -362,6 +362,9 @@ public:
   uint8_t getIDAC1mux(void); // Get the IDAC1 mux configuration
   uint8_t getIDAC2mux(void); // Get the IDAC2 mux configuration
 
+  // Print the ADS122C04 configuration (but only if enableDebugging has been called)
+  void printADS122C04config(void);
+
 private:
   //Variables
   TwoWire *_i2cPort;		//The generic connection to user's chosen I2C hardware

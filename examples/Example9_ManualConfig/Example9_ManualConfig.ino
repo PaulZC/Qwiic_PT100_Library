@@ -34,8 +34,6 @@ void setup(void)
 
   Wire.begin();
 
-  //mySensor.enableDebugging(); //Uncomment this line to enable debug messages on Serial
-
   if (mySensor.begin() == false) //Connect to the PT100 using the defaults: Address 0x45 and the Wire port
   {
     Serial.println(F("Qwiic PT100 not detected at default I2C address. Please check wiring. Freezing."));
@@ -61,6 +59,9 @@ void setup(void)
   mySensor.setIDAC1mux(ADS122C04_IDAC1_DISABLED); // Disable IDAC1
   mySensor.setIDAC2mux(ADS122C04_IDAC2_DISABLED); // Disable IDAC2
 
+  mySensor.enableDebugging(Serial); //Enable debug messages on Serial
+  mySensor.printADS122C04config(); //Print the configuration
+  mySensor.disableDebugging(); //Enable debug messages on Serial
 }
 
 void loop()
@@ -89,9 +90,16 @@ void loop()
   // The ADC data is returned in the least-significant 24-bits
   uint32_t raw_ADC_data = mySensor.readADC();
 
+  // Mask off the least-significant 24-bits, just in case
+  raw_ADC_data &= 0x00ffffff;
+
+  // Use sprintf to convert raw_ADC_data to a char array
+  char myStr[7]; // Create storage for 6 hex digits plus a null
+  sprintf(myStr, "%06X", raw_ADC_data);
+
   // Print the raw ADC data
   Serial.print(F("The raw ADC data is 0x"));
-  Serial.println(raw_ADC_data, HEX);
+  Serial.println(myStr);
 
   delay(250); //Don't pound the I2C bus too hard
 }
