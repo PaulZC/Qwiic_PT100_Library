@@ -1,6 +1,6 @@
 # Qwiic PT100 Library
 
-**A library to support the TI ADS122C04 on the Qwiic PT100**
+**A library to support Platinum Resistance Thermometer measurements using the TI ADS122C04 24-bit ADC**
 
 The Qwiic PT100 is based on the TI ADS122C04 and allows you to measure temperature accurately from
 100 Ohm Platinum Resistance Thermometers using 2, 3 or 4-wire connections.
@@ -15,7 +15,7 @@ should you need to.
 The Qwiic PT100 is dedicated to reading the temperature of 100 Ohm Platinum Resistance Thermometers
 using 2, 3 or 4-wire connections. Using a 3 or 4-wire connection allows the ADS122C04 to automatically
 compensate for the cable resistance. The differential input provides noise rejection for industrial
-applications.
+applications. The I2C address is configurable, allowing you to use multiple sensors on the same interface.
 
 ## Repository Contents
 
