@@ -1,6 +1,9 @@
 /*
-  This is a library written for the Qwiic PT100 based on the
-  TI ADS122C04 24-Bit 4-Channel 2-kSPS Delta-Sigma ADC With I2C Interface
+  This is a library written for the TI ADS122C04
+  24-Bit 4-Channel 2-kSPS Delta-Sigma ADC With I2C Interface
+
+  It allows you to measure temperature very accurately using a
+  Platinum Resistance Thermometer
 
   SparkFun sells these at its website: www.sparkfun.com
   Do you like this library? Help support SparkFun. Buy a board!
@@ -17,7 +20,7 @@
   http://www.ti.com/lit/zip/tidcee5
 
   The MIT License (MIT)
-  Copyright (c) 2020 Paul Clark
+  Copyright (c) 2020 SparkFun Electronics
   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
   associated documentation files (the "Software"), to deal in the Software without restriction,
   including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
@@ -48,7 +51,7 @@ boolean SFE_QWIIC_PT100::begin(uint8_t deviceAddress, TwoWire &wirePort)
   _deviceAddress = deviceAddress; //If provided, store the I2C address from user
   _i2cPort = &wirePort; //Grab which port the user wants us to use
   _printDebug = false; //Flag to print debugging variables
-  _wireMode = ADS122C04_4WIRE_MODE; //Default to 4-wire mode
+  _wireMode = ADS122C04_RAW_MODE; //Default to using 'safe' settings (disable the IDAC current sources)
 
   delay(1); // wait for power-on reset to complete (datasheet says we should do this)
 
@@ -63,11 +66,11 @@ boolean SFE_QWIIC_PT100::begin(uint8_t deviceAddress, TwoWire &wirePort)
 
   reset(); // reset the ADS122C04 (datasheet says we should do this)
 
-  return(configure234wire(ADS122C04_4WIRE_MODE)); // Configure the chip for 4-wire mode
+  return(configureADCmode(ADS122C04_RAW_MODE)); // Default to using 'safe' settings (disable the IDAC current sources)
 }
 
 // Configure the chip for the selected wire mode
-boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
+boolean SFE_QWIIC_PT100::configureADCmode(uint8_t wire_mode)
 {
   ADS122C04_initParam initParams; // Storage for the chip parameters
 
@@ -165,7 +168,7 @@ boolean SFE_QWIIC_PT100::configure234wire(uint8_t wire_mode)
   {
     if (_printDebug == true)
     {
-      _debugPort->println(F("configure234wire: unknown mode"));
+      _debugPort->println(F("configureADCmode: unknown mode"));
     }
     return(false);
   }
@@ -318,11 +321,11 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
 
   // Configure the ADS122C04 for raw mode
   // Disable the IDAC, use the internal 2.048V reference and set the gain to 1
-  if ((configure234wire(ADS122C04_RAW_MODE)) == false)
+  if ((configureADCmode(ADS122C04_RAW_MODE)) == false)
   {
     if (_printDebug == true)
     {
-      _debugPort->println(F("readRawVoltage: configure234wire (1) failed"));
+      _debugPort->println(F("readRawVoltage: configureADCmode (1) failed"));
     }
     return(0);
   }
@@ -344,7 +347,7 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
     {
       _debugPort->println(F("readRawVoltage: checkDataReady timed out"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(0);
   }
 
@@ -355,16 +358,16 @@ int32_t SFE_QWIIC_PT100::readRawVoltage(void)
     {
       _debugPort->println(F("readRawVoltage: ADS122C04_getConversionData failed"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(0);
   }
 
   // Restore the previous wire mode
-  if ((configure234wire(previousWireMode)) == false)
+  if ((configureADCmode(previousWireMode)) == false)
   {
   if (_printDebug == true)
     {
-      _debugPort->println(F("readRawVoltage: configure234wire (2) failed"));
+      _debugPort->println(F("readRawVoltage: configureADCmode (2) failed"));
     }
     return(0);
   }
@@ -410,11 +413,11 @@ float SFE_QWIIC_PT100::readInternalTemperature(void)
 
   // Enable the internal temperature sensor
   // Reading the ADC value will return the temperature
-  if ((configure234wire(ADS122C04_TEMPERATURE_MODE)) == false)
+  if ((configureADCmode(ADS122C04_TEMPERATURE_MODE)) == false)
   {
     if (_printDebug == true)
     {
-      _debugPort->println(F("readInternalTemperature: configure234wire (1) failed"));
+      _debugPort->println(F("readInternalTemperature: configureADCmode (1) failed"));
     }
     return(ret_val);
   }
@@ -436,7 +439,7 @@ float SFE_QWIIC_PT100::readInternalTemperature(void)
     {
       _debugPort->println(F("readInternalTemperature: checkDataReady timed out"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(ret_val);
   }
 
@@ -447,16 +450,16 @@ float SFE_QWIIC_PT100::readInternalTemperature(void)
     {
       _debugPort->println(F("readInternalTemperature: ADS122C04_getConversionData failed"));
     }
-    configure234wire(previousWireMode); // Attempt to restore the previous wire mode
+    configureADCmode(previousWireMode); // Attempt to restore the previous wire mode
     return(ret_val);
   }
 
   // Restore the previous wire mode
-  if ((configure234wire(previousWireMode)) == false)
+  if ((configureADCmode(previousWireMode)) == false)
   {
   if (_printDebug == true)
     {
-      _debugPort->println(F("readInternalTemperature: configure234wire (2) failed"));
+      _debugPort->println(F("readInternalTemperature: configureADCmode (2) failed"));
     }
     return(ret_val);
   }

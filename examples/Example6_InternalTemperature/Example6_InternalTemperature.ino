@@ -4,7 +4,7 @@
   Date: May 5th, 2020
 
   This example demonstrates how to read the PT100 temperature in Centigrade
-  and the ADS122C04 internal temperature
+  using 4-wire mode and also read the ADS122C04 internal temperature
 
   Hardware Connections:
   Plug a Qwiic cable into the PT100 and a BlackBoard
@@ -36,7 +36,7 @@ void setup(void)
       ;
   }
 
-  mySensor.configure234wire(ADS122C04_4WIRE_MODE); // Make sure the PT100 is in 4-wire mode
+  mySensor.configureADCmode(ADS122C04_4WIRE_MODE); // Configure the PT100 for 4-wire mode
 
 }
 
@@ -46,6 +46,7 @@ void loop()
   float temperature = mySensor.readPT100Centigrade();
 
   // Get the internal temperature in Centigrade
+  // readInternalTemperature will automatically restore the previous wire mode when complete
   float internal = mySensor.readInternalTemperature();
 
   // Print the temperature

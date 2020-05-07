@@ -3,7 +3,7 @@
   By: Paul Clark (PaulZC)
   Date: May 5th, 2020
 
-  When the ADS122C04 is initialised by .begin, it is configured for 4-wire mode.
+  When the ADS122C04 is initialised by .begin, it is configured for raw mode (which disables the IDAC).
   If you want to manually configure the chip, you can. This example demonstrates how.
 
   The IDAC current source is disabled, the gain is set to 1 and the internal 2.048V reference is selected.
@@ -43,8 +43,8 @@ void setup(void)
       ;
   }
 
-  // The ADS122C04 will now be configured for 4-wire mode.
-  // We can override that using these commands:
+  // The ADS122C04 will now be configured for raw mode.
+  // We can override the ADC mode using these commands:
 
   mySensor.setInputMultiplexer(ADS122C04_MUX_AIN1_AIN0); // Route AIN1 and AIN0 to AINP and AINN
   mySensor.setGain(ADS122C04_GAIN_1); // Set the gain to 1
@@ -70,12 +70,12 @@ void loop()
   unsigned long start_time = millis(); // Record the start time so we can timeout
   boolean drdy = false; // DRDY (1 == new data is ready)
 
-  // Wait for DRDY to go valid
+  // Wait for DRDY to go valid (by reading Config Register 2)
   // (You could read the DRDY pin instead, especially if you are using continuous conversion mode.)
   while((drdy == false) && (millis() < (start_time + ADS122C04_CONVERSION_TIMEOUT)))
   {
     delay(5); // Don't pound the I2C bus too hard
-    drdy = mySensor.checkDataReady();
+    drdy = mySensor.checkDataReady(); // Read DRDY from Config Register 2
   }
 
   // Check if we timed out

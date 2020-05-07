@@ -35,7 +35,7 @@ void setup(void)
       ;
   }
 
-  mySensor.configure234wire(ADS122C04_4WIRE_MODE); // Make sure the PT100 is in 4-wire mode
+  mySensor.configureADCmode(ADS122C04_4WIRE_MODE); // Configure the PT100 for 4-wire mode
 
 }
 
